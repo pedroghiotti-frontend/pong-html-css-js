@@ -1,3 +1,12 @@
+
+
+/*
+    TODO: Implementar mecânica de dash,
+    Implementar indicação visual no hit e display da tecla usada,
+    Algum tipo de limitação para evitar que a bola se movimente em direção muito vertical
+*/
+
+
 document.addEventListener("keydown", (e) =>
 {
     console.log(e.key);
@@ -7,16 +16,16 @@ document.addEventListener("keydown", (e) =>
             StartGame();
             break;
         case 'w':
-            p1Input = -1;
+            keyW = 1;
             break;
         case 's':
-            p1Input = 1;
+            keyS = 1;
             break;
         case 'arrowup':
-            p2Input = -1;
+            keyArrowUp = 1;
             break;
         case 'arrowdown':
-            p2Input = 1;
+            keyArrowDown = 1;
             break;
         case 'q':
             P1Hit();
@@ -32,16 +41,16 @@ document.addEventListener("keyup", (e) =>
     switch(e.key.toLocaleLowerCase())
     {
         case 'w':
-            p1Input = 0;
+            keyW = 0;
             break;
         case 's':
-            p1Input = 0;
+            keyS = 0;
             break;
         case 'arrowup':
-            p2Input = 0;
+            keyArrowUp = 0;
             break;
         case 'arrowdown':
-            p2Input = 0;
+            keyArrowDown = 0;
             break;
     }
 });
@@ -53,17 +62,24 @@ let p1ScoreText = document.querySelector('#p1Score');
 let p2ScoreText = document.querySelector('#p2Score');
 let prompt = document.querySelector('.prompt');
 
+let keyW = 0;
+let keyS = 0;
+let keyArrowUp = 0;
+let keyArrowDown = 0;
+
 let ballRadius = 10;
 let pSize = [15, 120];
 
 let ballPos = [0, 0];
 let ballDir = [0, 0];
-let ballSpeed = 5;
+let ballSpeedBase = 5;
+let ballSpeedMod = 0;
+let ballSpeed = 0;
 
 let hitRange = 30;
 
-let p1Pos = 0;
-let p2Pos = 0;
+let p1Pos = [0, 0];
+let p2Pos = [0, 0];
 let pSpeed = 2;
 
 let p1Input = 0;
@@ -76,6 +92,26 @@ let p2Score = 0;
 
 ResetGameState();
 
+function HandlePlayerInput()
+{
+    p1Input = 0;
+    p2Input = 0;
+    HandleP1Input();
+    HandleP2Input();
+}
+function HandleP1Input()
+{
+    if(keyW == 0 && keyS == 0) p1Input = 0;
+    if(keyW == 1) p1Input -= 1;
+    if(keyS == 1) p1Input += 1;
+}
+function HandleP2Input()
+{
+    if(keyArrowUp == 0 && keyArrowDown == 0) p2Input = 0;
+    if(keyArrowUp == 1) p2Input -= 1;
+    if(keyArrowDown == 1) p2Input += 1;
+}
+
 function HandlePlayerMovement()
 {
     HandleP1Movement();
@@ -83,29 +119,31 @@ function HandlePlayerMovement()
 }
 function HandleP1Movement()
 {
-    if(p1Input < 0 && p1Pos - (pSize[1] / 2) < -window.innerHeight / 2) return;
-    if(p1Input > 0 && p1Pos + (pSize[1] / 2) > window.innerHeight / 2) return;
+    if(p1Input < 0 && p1Pos[1] - (pSize[1] / 2) < -window.innerHeight / 2) return;
+    if(p1Input > 0 && p1Pos[1] + (pSize[1] / 2) > window.innerHeight / 2) return;
 
-    p1Pos += p1Input * pSpeed;
-    p1.setAttribute("style", `width: ${pSize[0]}px; height: ${pSize[1]}px; transform: translate( 0px, calc(-50% + ${p1Pos}px)`);
+    p1Pos[1] += p1Input * pSpeed;
+    p1.setAttribute("style", `width: ${pSize[0]}px; height: ${pSize[1]}px; transform: translate( ${p1Pos[0]}px, calc(-50% + ${p1Pos[1]}px)`);
 }
 function HandleP2Movement()
 {
-    if(p2Input < 0 && p2Pos - (pSize[1] / 2) < -window.innerHeight / 2) return;
-    if(p2Input > 0 && p2Pos + (pSize[1] / 2) > window.innerHeight / 2) return;
+    if(p2Input < 0 && p2Pos[1] - (pSize[1] / 2) < -window.innerHeight / 2) return;
+    if(p2Input > 0 && p2Pos[1] + (pSize[1] / 2) > window.innerHeight / 2) return;
 
-    p2Pos += p2Input * pSpeed;
-    p2.setAttribute("style", `width: ${pSize[0]}px; height: ${pSize[1]}px; transform: translate( 0px, calc(-50% + ${p2Pos}px)`);
+    p2Pos[1] += p2Input * pSpeed;
+    p2.setAttribute("style", `width: ${pSize[0]}px; height: ${pSize[1]}px; transform: translate( ${-p2Pos[0]}px, calc(-50% + ${p2Pos[1]}px)`);
 }
 function HandleBallMovement()
 {
+    ballSpeed = ballSpeedBase + ballSpeedMod;
+
     ballPos = [ ballPos[0] + (ballDir[0] * ballSpeed), ballPos[1] + (ballDir[1] * ballSpeed) ];
     ball.setAttribute("style", `width: ${2 * ballRadius}px; height: ${2 * ballRadius}px; transform: translate( calc(-50% + ${ballPos[0]}px), calc(-50% + ${ballPos[1]}px)`);
 }
 
 function HandleP1BallCollision()
 {
-    if(!(ballPos[1] < p1Pos + (pSize[1] / 2) && ballPos[1] > p1Pos - (pSize[1] / 2))) return;
+    if(!(ballPos[1] < p1Pos[1] + (pSize[1] / 2) && ballPos[1] > p1Pos[1] - (pSize[1] / 2))) return;
     if(!(ballPos[0] - ballRadius < (-window.innerWidth / 2) + 10 + (pSize[0] / 2) && ballPos[0] - ballRadius > (-window.innerWidth / 2) + 10 - (pSize[0] / 2))) return;
     
     ballPos = [(-window.innerWidth/2) + 10 + ballRadius + pSize[0]/2, ballPos[1]];
@@ -113,7 +151,7 @@ function HandleP1BallCollision()
 }
 function HandleP2BallCollision()
 {
-    if(!(ballPos[1] < p2Pos + (pSize[1] / 2) && ballPos[1] > p2Pos - (pSize[1] / 2))) return;
+    if(!(ballPos[1] < p2Pos[1] + (pSize[1] / 2) && ballPos[1] > p2Pos[1] - (pSize[1] / 2))) return;
     if(!(ballPos[0] + ballRadius > (window.innerWidth / 2) - 10 - (pSize[0] / 2) && ballPos[0] + ballRadius < (window.innerWidth / 2) - 10 + (pSize[0] / 2))) return;
     
     ballPos = [(window.innerWidth/2) - 10 - ballRadius - pSize[0]/2, ballPos[1]];
@@ -129,7 +167,9 @@ function HandleBorderBallCollision()
 
 function P1Hit()
 {
-    if(!(ballPos[1] < p1Pos + (pSize[1] / 2) && ballPos[1] > p1Pos - (pSize[1] / 2))) return;
+    ballSpeedMod += 1;
+
+    if(!(ballPos[1] < p1Pos[1] + (pSize[1] / 2) && ballPos[1] > p1Pos[1] - (pSize[1] / 2))) return;
     if(!(ballPos[0] - ballRadius < (-window.innerWidth / 2) + 10 + (pSize[0] / 2) + hitRange && ballPos[0] - ballRadius > (-window.innerWidth / 2) + 10 - (pSize[0] / 2) - hitRange)) return;
 
     newDir = [-ballDir[0] + 1, ballDir[1]];
@@ -140,7 +180,9 @@ function P1Hit()
 }
 function P2Hit()
 {
-    if(!(ballPos[1] < p2Pos + (pSize[1] / 2) && ballPos[1] > p2Pos - (pSize[1] / 2))) return;
+    ballSpeedMod += 1;
+
+    if(!(ballPos[1] < p2Pos[1] + (pSize[1] / 2) && ballPos[1] > p2Pos[1] - (pSize[1] / 2))) return;
     if(!(ballPos[0] + ballRadius > (window.innerWidth / 2) - 10 - (pSize[0] / 2) - hitRange && ballPos[0] + ballRadius < (window.innerWidth / 2) - 10 + (pSize[0] / 2) + hitRange)) return;
     
     newDir = [-ballDir[0] - 1, ballDir[1]];
@@ -173,14 +215,15 @@ function UpdateScoreUI()
 function ResetGameState()
 {
     ballDir = RandomDir();
+    ballSpeedMod = 0;
 
     ballPos = [0, 0];
     ball.setAttribute("style", `visibility: hidden; width: ${2 * ballRadius}px; height: ${2 * ballRadius}px; transform: translate(${ballPos[0] - ballRadius}px, ${ballPos[1] - ballRadius}px`);
     
-    p1Pos = 0;
-    p1.setAttribute("style", `width: ${pSize[0]}px; height: ${pSize[1]}px; transform: translate( 0px, calc(-50% + ${p1Pos}px)`);
-    p2Pos = 0;
-    p2.setAttribute("style", `width: ${pSize[0]}px; height: ${pSize[1]}px; transform: translate( 0px, calc(-50% + ${p2Pos}px)`);
+    p1Pos[1] = 0;
+    p1.setAttribute("style", `width: ${pSize[0]}px; height: ${pSize[1]}px; transform: translate( 0px, calc(-50% + ${p1Pos[1]}px)`);
+    p2Pos[1] = 0;
+    p2.setAttribute("style", `width: ${pSize[0]}px; height: ${pSize[1]}px; transform: translate( 0px, calc(-50% + ${p2Pos[1]}px)`);
     
     prompt.setAttribute("style", "visibility: visible;");
     
@@ -212,7 +255,8 @@ window.main = () =>
             break;
 
         case 1:
-
+            
+            HandlePlayerInput();
             HandlePlayerMovement();
             HandleBallMovement();
             
