@@ -1,9 +1,11 @@
 
 
 /*
-    TODO: Implementar mecânica de dash,
-    Implementar indicação visual no hit e display da tecla usada,
-    Algum tipo de limitação para evitar que a bola se movimente em direção muito vertical
+    TODO:
+    - Implementar mecânica de dash,
+    - Implementar indicação visual no hit e display da tecla usada,
+    - Algum tipo de limitação para evitar que a bola se movimente em direção muito vertical,
+    - Cooldown para o hit e indicação com um fillup do indicador.
 */
 
 
@@ -30,7 +32,7 @@ document.addEventListener("keydown", (e) =>
         case 'q':
             P1Hit();
             break;
-        case 'control':
+        case 'arrowleft':
             P2Hit();
             break;
     }
@@ -60,6 +62,10 @@ let p1 = document.querySelector('#p1');
 let p2 = document.querySelector('#p2');
 let p1ScoreText = document.querySelector('#p1Score');
 let p2ScoreText = document.querySelector('#p2Score');
+let p1UpText = document.querySelector('#p1Up');
+let p2UpText = document.querySelector('#p2Up');
+let p1DownText = document.querySelector('#p1Down');
+let p2DownText = document.querySelector('#p2Down');
 let prompt = document.querySelector('.prompt');
 
 let keyW = 0;
@@ -101,15 +107,47 @@ function HandlePlayerInput()
 }
 function HandleP1Input()
 {
-    if(keyW == 0 && keyS == 0) p1Input = 0;
-    if(keyW == 1) p1Input -= 1;
-    if(keyS == 1) p1Input += 1;
+    if(keyW == 1)
+    {
+        p1Input -= 1;
+        p1UpText.setAttribute("style", "color: rgba(255, 255, 255, 100%);");
+    }
+    else
+    {
+        p1UpText.setAttribute("style", "");
+    }
+
+    if(keyS == 1)
+    {
+        p1Input += 1;
+        p1DownText.setAttribute("style", "color: rgba(255, 255, 255, 100%);");
+    }
+    else
+    {
+        p1DownText.setAttribute("style", "");
+    }
 }
 function HandleP2Input()
 {
-    if(keyArrowUp == 0 && keyArrowDown == 0) p2Input = 0;
-    if(keyArrowUp == 1) p2Input -= 1;
-    if(keyArrowDown == 1) p2Input += 1;
+    if(keyArrowUp == 1)
+    {
+        p2Input -= 1;
+        p2UpText.setAttribute("style", "color: rgba(255, 255, 255, 100%);");
+    }
+    else
+    {
+        p2UpText.setAttribute("style", "");
+    }
+
+    if(keyArrowDown == 1)
+    {
+        p2Input += 1;
+        p2DownText.setAttribute("style", "color: rgba(255, 255, 255, 100%);");
+    }
+    else
+    {
+        p2DownText.setAttribute("style", "");
+    }
 }
 
 function HandlePlayerMovement()
@@ -172,7 +210,7 @@ function P1Hit()
     if(!(ballPos[1] < p1Pos[1] + (pSize[1] / 2) && ballPos[1] > p1Pos[1] - (pSize[1] / 2))) return;
     if(!(ballPos[0] - ballRadius < (-window.innerWidth / 2) + 10 + (pSize[0] / 2) + hitRange && ballPos[0] - ballRadius > (-window.innerWidth / 2) + 10 - (pSize[0] / 2) - hitRange)) return;
 
-    newDir = [-ballDir[0] + 1, ballDir[1]];
+    newDir = [ballDir[0] * (ballDir[0] / Math.abs(ballDir[0])) + 1, ballDir[1]];
     newDirMagnitude = Math.sqrt(Math.pow(newDir[0], 2) + Math.pow(newDir[1], 2));
     newDirNormalized = [newDir[0] / newDirMagnitude, newDir[1] / newDirMagnitude];
 
@@ -185,7 +223,7 @@ function P2Hit()
     if(!(ballPos[1] < p2Pos[1] + (pSize[1] / 2) && ballPos[1] > p2Pos[1] - (pSize[1] / 2))) return;
     if(!(ballPos[0] + ballRadius > (window.innerWidth / 2) - 10 - (pSize[0] / 2) - hitRange && ballPos[0] + ballRadius < (window.innerWidth / 2) - 10 + (pSize[0] / 2) + hitRange)) return;
     
-    newDir = [-ballDir[0] - 1, ballDir[1]];
+    newDir = [-ballDir[0] * (ballDir[0] / Math.abs(ballDir[0])) - 1, ballDir[1]];
     newDirMagnitude = Math.sqrt(Math.pow(newDir[0], 2) + Math.pow(newDir[1], 2));
     newDirNormalized = [newDir[0] / newDirMagnitude, newDir[1] / newDirMagnitude];
     
@@ -237,8 +275,8 @@ function StartGame()
 
 function RandomDir()
 {
-    let x = Math.random() * 2 - 1;
-    let y = Math.random() * 2 - 1;
+    let x = ((Math.random() * 2) - 1);
+    let y = ((Math.random() * 2) - 1);
     let magnitude = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
     let dirNormalized = [x / magnitude, y / magnitude];
 

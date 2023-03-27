@@ -4,15 +4,24 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Pong</title>
+    <link rel="shortcut icon" href="https://cdn.discordapp.com/attachments/1010669051028176908/1089256380470399148/favicon.png" type="image/x-icon">
     <link rel="stylesheet" href="./style.css">
     <script src="./main.js" defer></script>
 </head>
 <body>
     <div class="gameElements">
         <div class="ball"></div>
-        <div id="p1" class="paddle"></div>
-        <div id="p2" class="paddle"></div>
+        <div id="p1" class="paddle">
+            <div id="p1Up" class="controlsUp">W</div>
+            <div id="p1Down" class="controlsDown">S</div>
+            <div id="p1Hit" class="controlsHit">Q</div>
+        </div>
+        <div id="p2" class="paddle">
+            <div id="p2Up" class="controlsUp">&uparrow;</div>
+            <div id="p2Down" class="controlsDown">&downarrow;</div>
+            <div id="p2Hit" class="controlsHit">&leftarrow;</div>
+        </div>
     </div>
     <div class="uiElements">
         <div id="p1Score" class="score">0</div>

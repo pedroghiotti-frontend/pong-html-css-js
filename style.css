@@ -35,66 +35,53 @@ body
   
   background-color: white;
 }
-.paddle::before
+
+.controlsUp, .controlsDown, .controlsHit
 {
     content: '-';
     
     position: absolute;
 
-    top: 0;
-
     width: inherit;
     height: fit-content;
 
-    transform: translateY(-150%);
-
     text-align: center;
-    
+
     color: rgba(255, 255, 255, 25%);
     filter: drop-shadow(0 0 3px white);
 }
-.paddle::after
+.controlsUp
 {
-    content: '+';
-
-    position: absolute;
-
+    top: 0;
+    transform: translateY(-150%);
+}
+.controlsDown
+{
     bottom: 0;
-
-    width: inherit;
-    height: fit-content;
-
     transform: translateY(150%);
-
-    text-align: center;
-    
-    color: rgba(255, 255, 255, 25%);
-    filter: drop-shadow(0 0 3px white);
+}
+.controlsHit
+{
+    top: 50%;
+}
+#p1Hit
+{
+    right: 0;
+    transform: translate(150%, -50%);
+}
+#p2Hit
+{
+    left: 0;
+    transform: translate(-150%, -50%);
 }
 
 #p1
 {
     left: 10px;
 }
-#p1::before
-{
-    content: 'W';
-}
-#p1::after
-{
-    content: 'S';
-}
 #p2
 {
     right: 10px;
-}
-#p2::before
-{
-    content: '\2191';
-}
-#p2::after
-{
-    content: '\2193';
 }
 
 .uiElements
