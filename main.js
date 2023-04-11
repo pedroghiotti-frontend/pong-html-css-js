@@ -3,9 +3,9 @@
 /*
     TODO:
     - Implementar mecânica de dash,
-    - Implementar indicação visual no hit e display da tecla usada,
+    -- dash pode funcionar pra alterar a dir da bola também?
+    - Implementar indicação visual no hit,
     - Algum tipo de limitação para evitar que a bola se movimente em direção muito vertical,
-    - Cooldown para o hit e indicação com um fillup do indicador.
 */
 
 
@@ -66,6 +66,8 @@ let p1UpText = document.querySelector('#p1Up');
 let p2UpText = document.querySelector('#p2Up');
 let p1DownText = document.querySelector('#p1Down');
 let p2DownText = document.querySelector('#p2Down');
+let p1HitCooldown = document.querySelector('#progressP1Hit');
+let p2HitCooldown = document.querySelector('#progressP2Hit');
 let prompt = document.querySelector('.prompt');
 
 let keyW = 0;
@@ -83,6 +85,9 @@ let ballSpeedMod = 0;
 let ballSpeed = 0;
 
 let hitRange = 30;
+let hitCooldownMax = 500;
+let hitCooldownCurrentP1 = 0;
+let hitCooldownCurrentP2 = 0;
 
 let p1Pos = [0, 0];
 let p2Pos = [0, 0];
@@ -95,6 +100,9 @@ let gameState = 0;
 
 let p1Score = 0;
 let p2Score = 0;
+
+let t = 0;
+let timeElapsed = 0;
 
 ResetGameState();
 
@@ -205,11 +213,14 @@ function HandleBorderBallCollision()
 
 function P1Hit()
 {
-    ballSpeedMod += 1;
+    if(hitCooldownCurrentP1 < hitCooldownMax) return;
+
+    hitCooldownCurrentP1 = 0;
 
     if(!(ballPos[1] < p1Pos[1] + (pSize[1] / 2) && ballPos[1] > p1Pos[1] - (pSize[1] / 2))) return;
     if(!(ballPos[0] - ballRadius < (-window.innerWidth / 2) + 10 + (pSize[0] / 2) + hitRange && ballPos[0] - ballRadius > (-window.innerWidth / 2) + 10 - (pSize[0] / 2) - hitRange)) return;
-
+    
+    ballSpeedMod += 1;
     newDir = [ballDir[0] * (ballDir[0] / Math.abs(ballDir[0])) + 1, ballDir[1]];
     newDirMagnitude = Math.sqrt(Math.pow(newDir[0], 2) + Math.pow(newDir[1], 2));
     newDirNormalized = [newDir[0] / newDirMagnitude, newDir[1] / newDirMagnitude];
@@ -217,17 +228,29 @@ function P1Hit()
     ballDir = newDirNormalized;
 }
 function P2Hit()
-{
-    ballSpeedMod += 1;
+{   
+    if(hitCooldownCurrentP2 < hitCooldownMax) return;
+
+    hitCooldownCurrentP2 = 0;
 
     if(!(ballPos[1] < p2Pos[1] + (pSize[1] / 2) && ballPos[1] > p2Pos[1] - (pSize[1] / 2))) return;
     if(!(ballPos[0] + ballRadius > (window.innerWidth / 2) - 10 - (pSize[0] / 2) - hitRange && ballPos[0] + ballRadius < (window.innerWidth / 2) - 10 + (pSize[0] / 2) + hitRange)) return;
     
+    ballSpeedMod += 1;
     newDir = [-ballDir[0] * (ballDir[0] / Math.abs(ballDir[0])) - 1, ballDir[1]];
     newDirMagnitude = Math.sqrt(Math.pow(newDir[0], 2) + Math.pow(newDir[1], 2));
     newDirNormalized = [newDir[0] / newDirMagnitude, newDir[1] / newDirMagnitude];
     
     ballDir = newDirNormalized;
+}
+
+function HandleCooldowns()
+{
+    hitCooldownCurrentP1 += timeElapsed;
+    hitCooldownCurrentP2 += timeElapsed;
+
+    if(hitCooldownCurrentP1 > hitCooldownMax) hitCooldownCurrentP1 = hitCooldownMax;
+    if(hitCooldownCurrentP2 > hitCooldownMax) hitCooldownCurrentP2 = hitCooldownMax;
 }
 
 function HandleScore()
@@ -245,11 +268,23 @@ function HandleScore()
 
     UpdateScoreUI();
 }
+
+function UpdateUI()
+{
+    UpdateCooldownsUI();
+    UpdateScoreUI();
+}
 function UpdateScoreUI()
 {
     p1ScoreText.innerHTML = p1Score;
     p2ScoreText.innerHTML = p2Score;
 }
+function UpdateCooldownsUI()
+{
+    p1HitCooldown.setAttribute("style", `--fill: ${(hitCooldownCurrentP1 / hitCooldownMax) * 100}%; height: var(--fill);`);
+    p2HitCooldown.setAttribute("style", `--fill: ${(hitCooldownCurrentP2 / hitCooldownMax) * 100}%; height: var(--fill);`);
+}
+
 function ResetGameState()
 {
     ballDir = RandomDir();
@@ -282,6 +317,11 @@ function RandomDir()
 
     return dirNormalized;
 }
+function CaculateTimeElapsed()
+{
+    timeElapsed = Date.now() - t;
+    t = Date.now();
+}
 
 window.main = () =>
 {
@@ -293,6 +333,10 @@ window.main = () =>
             break;
 
         case 1:
+            CaculateTimeElapsed();
+            HandleCooldowns();
+
+            UpdateCooldownsUI();
             
             HandlePlayerInput();
             HandlePlayerMovement();

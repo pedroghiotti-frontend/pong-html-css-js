@@ -44,6 +44,7 @@ body
 
     width: inherit;
     height: fit-content;
+    line-height: 1.2ch;
 
     text-align: center;
 
@@ -63,6 +64,16 @@ body
 .controlsHit
 {
     top: 50%;
+    line-height: 1.8ch;
+}
+.progress
+{
+    position: absolute;
+    bottom:0;
+
+    overflow: hidden;
+
+    width: 100%;
 }
 #p1Hit
 {
@@ -158,4 +169,12 @@ body
 
     background-color: rgba(255, 255, 255, 20%);
     filter: drop-shadow(0 0 5px white);
+}
+
+
+.fill
+{
+    transform: translateY(calc(-100% + var(--fill)));
+
+    color: white;
 }
